@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const timeZone = require('mongoose-timezone')
 
 const productSchema = new mongoose.Schema({
     name: {
@@ -8,15 +9,14 @@ const productSchema = new mongoose.Schema({
         minlength: [5, 'too short, min 5 character']
     },
     category: {
-        type: String,
-        enum: ['food', 'handphone', 'electronic']
+        type: String
     },
     price: {
         type: Number,
         required: true
     },
     stock: {
-        type:Number,
+        type: Number,
         default: 1
     },
     description: {
@@ -31,14 +31,16 @@ const productSchema = new mongoose.Schema({
     weight: {
         type: Number
     },
-    date: {
+    productDate: {
         type: Date,
         default: Date.now
     },
-    user: [{
+    merchant: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-    }]
+    }
 })
 const Product = mongoose.model('Product', productSchema)
+productSchema.plugin(timeZone)
+
 module.exports = Product

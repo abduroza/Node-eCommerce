@@ -17,7 +17,7 @@ mongoose.connect(configDB[env], {useNewUrlParser: true, useCreateIndex: true, us
 .then(() => console.log("Connect DB"))
 
 const morgan = require('morgan')
-app.use(morgan('tiny')) //to show log in console
+app.use(morgan('dev')) //to show log in console
 const cors = require('cors') 
 app.use(cors()) // to connect with frontend. if not given can't read by frontend
 app.use(express.json()) //to get req.body as changer bodyparser

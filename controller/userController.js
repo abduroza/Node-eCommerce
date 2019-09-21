@@ -8,7 +8,7 @@ async function register(req, res){
     try {
         let hash = await bcrypt.hash(req.body.password, saltRounds)
         let data = await User.create({firstname: req.body.firstname, lastname: req.body.lastname, username: req.body.username, email: req.body.email, password: hash, role: req.body.role})
-        res.status(201).json(sucRes(req.body, "Register Success")) //if using data not req.body, will show result data register after hash
+        res.status(201).json(sucRes({firstname: data.firstname, lastname: data.lastname, username: data.username, email: data.email, role: data.role, _id: data._id}, "Register Success")) //if using data will show all, include password information. Thhis code to hidden password when send response
     } catch (err) {
         if(err) res.status(422).json(failRes(err.message, "please fill correctly"))
     }
@@ -26,11 +26,11 @@ async function login(req, res){
                res.status(200).json(sucRes(token, "Login Success"))
             }
         } catch (err) {
-            if (err) res.status(404).json(failRes(err, "Invalid Password"))
+            res.status(404).json(failRes(err, "Invalid Password"))
         }
     }
 }
-async function show(req, res){
+async function show(req, res){ //show user's account and user's product
     let user = await User.findById(req.user)
         .populate({
             path: 'products', //'products' same as field in user model
@@ -38,4 +38,5 @@ async function show(req, res){
         })
     res.status(200).json(sucRes(user, "Below Your Data Account"))
 }
+
 module.exports = {register, login, show}

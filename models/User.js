@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const uniqueValidator = require('mongoose-unique-validator')
+const timeZone = require('mongoose-timezone')
 
 const userSchema = new mongoose.Schema({
     firstname: {
@@ -38,10 +39,14 @@ const userSchema = new mongoose.Schema({
         enum: ['merchant', 'customer'],
         default: 'customer'
     },
-    date: {
+    registerDate: {
         type: Date,
         default: Date.now
     },
+    histories: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'History'
+    }],
     products: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
@@ -49,10 +54,11 @@ const userSchema = new mongoose.Schema({
     carts: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Cart'
-    }]
+    }],
 })
 
 const User = mongoose.model('User', userSchema)
 userSchema.plugin(uniqueValidator)
+userSchema.plugin(timeZone)
 
 module.exports = User
