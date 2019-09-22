@@ -4,12 +4,10 @@ const timeZone = require('mongoose-timezone')
 
 const userSchema = new mongoose.Schema({
     firstname: {
-        type: String,
-        required: [true, 'first name must be filled']
+        type: String
     },
     lastname: {
-        type: String,
-        required: [true, 'last name must be filled']
+        type: String
     },
     username: {
         type: String,
@@ -42,19 +40,7 @@ const userSchema = new mongoose.Schema({
     registerDate: {
         type: Date,
         default: Date.now
-    },
-    histories: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'History'
-    }],
-    products: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product'
-    }],
-    carts: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Cart'
-    }],
+    }
 })
 
 const User = mongoose.model('User', userSchema)

@@ -4,12 +4,8 @@ const {sucRes, failRes} = require('../helper/resFormat')
 
 async function addProduct(req, res){
     try {
-        let user = await User.findById(req.user)
         let product = await Product.create(req.body)
-
-        user.products.push(product) //to insert product into field products's user
-        user.save()
-        product.merchant.push(user) //to insert user data into field merchant's product. push only can used if an array
+        product.merchant = req.user //to insert user data into field merchant's product. not use push. push only can used if an array
         product.save()
        
         res.status(201).json(sucRes(product, "Add Product Success"))
@@ -20,16 +16,24 @@ async function addProduct(req, res){
 async function updateProduct(req, res){
     try {
         let product = await Product.findById(req.params.id)
-        if (product.user[0]._id != req.user){
-            return res.status(400).json(failRes("Acces denied. This isn't your product"))
-        } else {
+        if (!product) {
+            return res.status(404).json(failRes("ID Product Not Found"))
+        } else if(product.merchant != req.user) {
+            return res.status(400).json(failRes("Access denied. This isn't your product"))
+        }
+        try {
             let data = await Product.findByIdAndUpdate(req.params.id, {$set: req.body})
             res.status(200).json(sucRes(data, "Product Update Success"))
-            res.status(400).json(failRes("Wrong Type"))
+        } catch (err) {
+            res.status(400).json(failRes(err.message, "Wrong Type"))
         }
     } catch (err) {
-        res.status(404).json(failRes(err, "ID Not Found"))
+        res.status(404).json(failRes(err.message, "ID Not Found"))
     }
+}
+async function showMerchantProduct(req, res){
+    let product = await Product.find({merchant: req.user}).populate({path: 'merchant', select: ['_id', 'username']})
+    res.status(200).json(sucRes(product, "Your Products"))
 }
 async function showOne(req, res){
     try {
@@ -46,13 +50,13 @@ async function showAll(req, res){
     let product = await Product.find({})
     res.status(200).json(sucRes(product, "Show All Product"))
 }
-async function showByCategory(req, res){
-    try {
-        let product = await Product.find({category: req.body.category})
-        res.status(200).json(sucRes(product, "Show by Category"))
-    } catch (err) {
-        res.status(404).json(failRes(err, "Category Not Found"))
-        
-    }
+async function showCategory(req, res){
+    let product = await Product.find({category: req.body.category})
+    res.status(200).json(sucRes(product, "Show by Category"))
 }
-module.exports = {addProduct, updateProduct, showOne, showAll, showByCategory}
+async function showName(req, res){
+    let product = await Product.find({name: req.body.name.toLowerCase()})
+    res.status(200).json(sucRes(product, "Show by Name"))
+}
+
+module.exports = {addProduct, showMerchantProduct, updateProduct, showOne, showAll, showCategory, showName}

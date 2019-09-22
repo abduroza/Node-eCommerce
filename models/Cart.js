@@ -14,16 +14,18 @@ const cartSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    products: [{
+    product: { // not use array due to only one by one product which enter into Cart
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
-    }]
-    // products: [{
-    //     product: {type: mongoose.Schema.Types.ObjectId, ref: 'Product'},
-    //     quantity: {type: Number, default: 1},
-    //     price: {type: Number, default: 0},
-    //     weight: {type: Number, default: 0}
-    // }]
+    },
+    subTotal: {
+        type: Number,
+        default: 0
+    },
+    subWeight: {
+        type: Number,
+        default: 0
+    }
 })
 
 const Cart = mongoose.model('Cart', cartSchema)

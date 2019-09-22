@@ -1,21 +1,37 @@
 const Cart = require('../models/Cart')
+const Order = require('../models/Order')
 const User = require('../models/User')
 const Product = require('../models/Product')
 const {sucRes, failRes} = require('../helper/resFormat')
 
 async function addToCart(req, res){
     try {
-        let cart = await Cart.create(req.body)
         let product = await Product.findById(req.params.id)
-        let user = await User.findById(req.user) //req.user is user active. req.user contain user id
-
-        cart.customer = req.user //insert customer id into field customer's cart. field customer is an object
-        cart.products.push(product) //insert product into field products's cart. field products is an array
+        if(product.merchant == req.user){ //customer can't order a product which stock less than qty order customer
+            return res.status(403).json(failRes("You don't allow to buy yourself product"))
+        } else if(product.stock < req.body.quantity){
+            return res.status(400).json(failRes("Stock less than your order. Reduce your order"))
+        }
+        let cart = await Cart.create({quantity: req.body.quantity, product: req.params.id}) //fill quantity in req.body and id product in req.params
+        //let product = await Product.findById(req.params.id) //this function not use because already insert in let cart. made simple code
+        let subtotal = (req.body.quantity * product.price)
+        cart.subTotal = subtotal
+        let subweight = (req.body.quantity * product.weight)
+        cart.subWeight = subweight
         cart.save()
-        user.carts.push(cart)
-        user.save()
 
-        res.status(200).json(sucRes(cart, "Success Add To Cart"))
+
+        let stock = (product.stock - req.body.quantity) //stock product will reduce automatically if customer add to cart
+        product.stock = stock
+        product.save()
+
+        let order = await Order.findOne({customer: req.user, isDone: false}).populate('products')
+        order.products.push(cart)
+        order.totalPrice += subtotal
+        order.totalWeight += subweight
+        order.save()
+
+        res.status(200).json(sucRes(order, "Success Add To Cart"))
     } catch (err) {
         res.status(404).json(failRes(err, "product not found"))
     }
@@ -38,7 +54,7 @@ async function showAllOrder(req, res){
    // try {
         let cart = await Cart.find({}) //belum berjalan
         console.log({customer: req.user})
-        console.log(cart)
+        //console.log(cart)
         res.status(200).json(sucRes(cart, "Your Chart Order"))
     // } catch (err) {
     //     res.status(404).json(failRes(err, "wrong"))

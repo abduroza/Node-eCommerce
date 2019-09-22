@@ -1,4 +1,5 @@
 const User = require('../models/User')
+const Order = require('../models/Order')
 const {sucRes, failRes} = require('../helper/resFormat')
 const bcrypt = require('bcrypt')
 const saltRounds = 10
@@ -8,6 +9,11 @@ async function register(req, res){
     try {
         let hash = await bcrypt.hash(req.body.password, saltRounds)
         let data = await User.create({firstname: req.body.firstname, lastname: req.body.lastname, username: req.body.username, email: req.body.email, password: hash, role: req.body.role})
+
+        // if (data.role == 'customer') {
+        //     Order.create({customer: data._id}) //otomatis membuat filed order yg berisi customer's
+        // }
+        Order.create({customer: data._id}) //automatic make a field customer in collection order contain customer's id
         res.status(201).json(sucRes({firstname: data.firstname, lastname: data.lastname, username: data.username, email: data.email, role: data.role, _id: data._id}, "Register Success")) //if using data will show all, include password information. Thhis code to hidden password when send response
     } catch (err) {
         if(err) res.status(422).json(failRes(err.message, "please fill correctly"))
@@ -32,10 +38,10 @@ async function login(req, res){
 }
 async function show(req, res){ //show user's account and user's product
     let user = await User.findById(req.user)
-        .populate({
-            path: 'products', //'products' same as field in user model
-            select: ['_id', 'name', 'category', 'price', 'stock', 'description', 'condition', 'weight', 'date', 'user']
-        })
+        // .populate({
+        //     path: 'products', //'products' same as field in user model
+        //     select: ['_id', 'name', 'category', 'price', 'stock', 'description', 'condition', 'weight', 'date', 'user']
+        // })
     res.status(200).json(sucRes(user, "Below Your Data Account"))
 }
 

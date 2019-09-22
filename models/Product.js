@@ -4,7 +4,7 @@ const timeZone = require('mongoose-timezone')
 const productSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
+        required: [true, 'name must be filled'],
         maxlength: [80, 'too length, max 80 characters'],
         minlength: [5, 'too short, min 5 character']
     },
@@ -13,7 +13,7 @@ const productSchema = new mongoose.Schema({
     },
     price: {
         type: Number,
-        required: true
+        required: [true, 'price must be filled in IDR. example: 150000']
     },
     stock: {
         type: Number,
@@ -29,7 +29,8 @@ const productSchema = new mongoose.Schema({
         default: true
     },
     weight: {
-        type: Number
+        type: Number,
+        required: [true, 'Weight must filled. Weight in gram']
     },
     productDate: {
         type: Date,
