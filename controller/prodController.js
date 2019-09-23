@@ -16,10 +16,8 @@ async function addProduct(req, res){
 async function updateProduct(req, res){
     try {
         let product = await Product.findById(req.params.id)
-        if (!product) {
-            return res.status(404).json(failRes("ID Product Not Found"))
-        } else if(product.merchant != req.user) {
-            return res.status(400).json(failRes("Access denied. This isn't your product"))
+        if (product.merchant != req.user) {
+            return res.status(403).json(failRes("Access denied. This isn't your product"))
         }
         try {
             let data = await Product.findByIdAndUpdate(req.params.id, {$set: req.body})
@@ -28,7 +26,7 @@ async function updateProduct(req, res){
             res.status(400).json(failRes(err.message, "Wrong Type"))
         }
     } catch (err) {
-        res.status(404).json(failRes(err.message, "ID Not Found"))
+        res.status(404).json(failRes(err.message, "ID Product Not Found"))
     }
 }
 async function showMerchantProduct(req, res){
@@ -46,16 +44,16 @@ async function showOne(req, res){
         res.status(400).json(failRes(err.message, "ID not found"))
     }
 }
-async function showAll(req, res){
+async function showAll(req, res){//show all product
     let product = await Product.find({})
     res.status(200).json(sucRes(product, "Show All Product"))
 }
-async function showCategory(req, res){
+async function showCategory(req, res){ //showing product by category
     let product = await Product.find({category: req.body.category})
     res.status(200).json(sucRes(product, "Show by Category"))
 }
-async function showName(req, res){
-    let product = await Product.find({name: req.body.name.toLowerCase()})
+async function showName(req, res){ //showing product by name
+    let product = await Product.find({name: req.body.name})
     res.status(200).json(sucRes(product, "Show by Name"))
 }
 
