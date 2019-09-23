@@ -1,4 +1,6 @@
 const User = require('../models/User')
+const Product = require('../models/Product')
+const Cart = require('../models/Cart')
 const Order = require('../models/Order')
 const {sucRes, failRes} = require('../helper/resFormat')
 const bcrypt = require('bcrypt')
@@ -38,11 +40,18 @@ async function login(req, res){
 }
 async function show(req, res){ //show user's account and user's product
     let user = await User.findById(req.user)
-        // .populate({
-        //     path: 'products', //'products' same as field in user model
-        //     select: ['_id', 'name', 'category', 'price', 'stock', 'description', 'condition', 'weight', 'date', 'user']
-        // })
     res.status(200).json(sucRes(user, "Below Your Data Account"))
 }
+async function deleteUser(req, res){ //delete user's carts, user's orders, user's products, and an user
+    try {
+        let cart = await Cart.deleteMany({customer: req.user})
+        let order = await Order.deleteMany({customer: req.user})
+        let product = await Product.deleteMany({merchant: req.user})
+        let user = await User.findByIdAndDelete(req.user)
+        res.status(200).json(sucRes(user, "Delete an User Success"))
+    } catch (err) {
+        res.status(400).json(failRes(err.message, "delete fail"))
+    }
+}
 
-module.exports = {register, login, show}
+module.exports = {register, login, show, deleteUser}

@@ -41,7 +41,7 @@ async function showOne(req, res){
         //if (product.merchant._id != req.user) return res.status(400).json(failRes("This isn't Your Product"))
         res.status(200).json(sucRes(product, "Show a Product Success"))
     } catch (err) {
-        res.status(400).json(failRes(err.message, "ID not found"))
+        res.status(404).json(failRes(err.message, "ID not found"))
     }
 }
 async function showAll(req, res){//show all product

@@ -9,11 +9,11 @@ async function authLogin (req, res, next){
     try {
         let decoded = await jwt.verify(splitToken[1], 'r4h45145ek4l1')
         req.user = decoded._id
-        let data = await User.findById(req.user)
-        if(!data) return res.status(404).json(failRes("User Not Found"))
+        let user = await User.findById(req.user)
+        if(!user) return res.status(410).json(failRes("User Gone Due to Already Deleted"))
         next()
     } catch (err) {
-        res.status(400).json(failRes("Invalid Token"))
+        res.status(401).json(failRes("Invalid Token"))
     }
 }
 

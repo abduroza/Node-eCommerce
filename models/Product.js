@@ -6,7 +6,7 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: [true, 'name must be filled'],
         maxlength: [80, 'too length, max 80 characters'],
-        minlength: [5, 'too short, min 5 character']
+        minlength: [3, 'too short, min 3 character']
     },
     category: {
         type: String
