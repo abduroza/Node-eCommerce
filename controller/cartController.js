@@ -10,7 +10,7 @@ async function addToCart(req, res){
         if(product.merchant == req.user){ //customer can't order a product which stock less than qty order customer
             return res.status(403).json(failRes("You don't permission to buy yourself product"))
         } else if(product.stock < req.body.quantity){
-            return res.status(400).json(failRes("Stock less than your order. Reduce your order"))
+            return res.status(400).json(failRes("Stock less than your quantity order. Reduce your quantity order"))
         }
         let cart = await Cart.create({quantity: req.body.quantity, product: req.params.id}) //fill quantity in req.body and id product in req.params
         //let product = await Product.findById(req.params.id) //this function not use because already insert in let cart. made simple code

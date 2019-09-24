@@ -49,11 +49,11 @@ async function showAll(req, res){//show all product
     res.status(200).json(sucRes(product, "Show All Product"))
 }
 async function showCategory(req, res){ //showing product by category
-    let product = await Product.find({category: req.body.category})
+    let product = await Product.find({category: new RegExp(req.body.category, 'i')})
     res.status(200).json(sucRes(product, "Show by Category"))
 }
 async function showName(req, res){ //showing product by name
-    let product = await Product.find({name: req.body.name})
+    let product = await Product.find({name: new RegExp(req.body.name, 'i')})
     res.status(200).json(sucRes(product, "Show by Name"))
 }
 
