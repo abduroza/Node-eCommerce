@@ -53,7 +53,8 @@ async function showCategory(req, res){ //showing product by category
     res.status(200).json(sucRes(product, "Show by Category"))
 }
 async function showName(req, res){ //showing product by name
-    let product = await Product.find({name: new RegExp(req.body.name, 'i')})
+    //RegExp useful to ignore lowercase, uppercase and specific name. $gte useful to filter name product which have stock >= 1
+    let product = await Product.find({name: new RegExp(req.body.name, 'i'), stock: {$gte: 1} }) //regexp useful to ignore lowercase, uppercase and specific name. this function will show name of product which contain as filled user in form
     res.status(200).json(sucRes(product, "Show by Name"))
 }
 
