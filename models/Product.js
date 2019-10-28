@@ -32,6 +32,10 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: [true, 'Weight must filled. Weight in gram']
     },
+    image: {
+        type: String,
+        default: 'No Image'
+    },
     productDate: {
         type: Date,
         default: Date.now

@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'username must be filled'],
         unique: [true, 'username already exist, must be unique'],
+        trim: true, //to throw space
         minlength: [3, 'too short, min 3 character'],
         validate: function(username){
             return /^\S*$/.test(username) //using regular expression
@@ -22,6 +23,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'email must be filled'],
         unique: [true, 'email already exist, must be unique'],
+        trim: true, //to throw space
         validate: function validateEmail(email) {
             var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             return re.test(String(email).toLowerCase());
@@ -31,6 +33,9 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         minlength: [5, 'too short, min 5 character']
+    },
+    image: {
+        type: String
     },
     role: {
         type: String,

@@ -7,7 +7,7 @@ async function authLogin (req, res, next){
     if(!bearerToken) return res.status(401).json(failRes("Token Not Available"))
     let splitToken = bearerToken.split(" ") //only 2nd array will read
     try {
-        let decoded = await jwt.verify(splitToken[1], 'r4h45145ek4l1')
+        let decoded = await jwt.verify(splitToken[1], process.env.TOKEN_SECRET)
         req.user = decoded._id
         let user = await User.findById(req.user)
         if(!user) return res.status(410).json(failRes("User Gone Due to Already Deleted"))

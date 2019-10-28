@@ -3,6 +3,7 @@ const userController = require('../../controller/userController')
 const auth = require('../../middleware/auth')
 
 router.post('/register', userController.register)
+router.put('/update/', [auth.authLogin], userController.userUpdate)
 router.post('/login/', userController.login)
 router.get('/show', [auth.authLogin], userController.show)
 router.delete('/delete', [auth.authLogin], userController.deleteUser)
