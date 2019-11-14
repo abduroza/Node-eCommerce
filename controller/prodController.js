@@ -21,66 +21,33 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME
 });
-async function addScholarship(req, res){
+
+async function addProduct(req, res){
     try {
-        if (req.decoded.role != 'investor'){
-            return res.status(403).json(funcHelpers.errorResponse('Access denied. Only for investor'))
-        }
+        await uploadImage.single('images')(req, res, (err)=>{
+            if(err) return res.status(400).json(failRes(err.message))
+            Product.create(req.body, (err, product)=>{
+                if (err) res.status(400).json(failRes(err))
 
-        let data_investor = await Investor.findOne({ id_user: req.decoded._id})
-        if(data_investor===null){
-            return res.status(404).json(funcHelpers.errorResponse('Profile investor not exist'))
-        }
+                product.merchant = req.user //to insert user data into field merchant's product. not use push. push only can used if an array
+                product.save()
+                
+                if (req.file == null){
+                    return res.status(201).json(sucRes(product, "Add product success"))
+                }
+                let file = dUri.format(`${req.file.originalname}-${Date.now()}`, req.file.buffer)
+                cloudinary.uploader.upload(file.content, {use_filename: true, folder: "eCommerce"}, (err, result) => {
+                    if (err) return res.status(400).json(failRes(err));
 
-        await uploadImage.single('image')(req, res, (err)=>{
-            if(err) return res.status(400).json(funcHelpers.errorResponse(err))
-            User.findById(req.decoded._id, (err, user) =>{
-                Scholarship.create(req.body, (err, scholarship) =>{
-                    if (err) return res.status(422).json(funcHelpers.errorResponse(err))
+                    product.images.push(result.secure_url)
+                    product.save()
 
-                    scholarship.id_investor = user.id_investor
-                    scholarship.id_user = user._id
-                    scholarship.save()
-
-                    Investor.findOne({id_user: req.decoded._id}, (err, investor)=>{
-                        investor.list_id_sch.push(scholarship)
-                        investor.save()
-
-                        if (req.file == null){
-                            return res.status(201).json(funcHelpers.successResponse(scholarship, "Add scholarship success"))
-                        }
-                        let file = dUri.format(`${req.file.originalname}-${Date.now()}`, req.file.buffer)
-                        cloudinary.uploader.upload(file.content, {use_filename: true, folder: "belegend"}, (err, result) =>{
-                            if (err) return res.status(400).json(funcHelpers.errorResponse(err))
-
-                            scholarship.image = result.url
-                            scholarship.save()
-
-                            res.status(201).json(funcHelpers.successResponse(scholarship, "Add scholarship success"))
-                        })
-                    })
+                    res.status(201).json(sucRes(product, "Add product and image success"))
                 })
             })
         })
-    } catch (err) {  res.status(422).json(funcHelpers.errorResponse(err))  }}
-async function addProduct(req, res){
-    try {
-        let user = await User.findById(req.user)
-        if (user.role != 'merchant') {
-            return res.status(403).json(failRes("Access denied. Only for merchant. If you will selling, please edit your profile change your role into merchant"))
-        }
-        await uploadImage.array('image', 2)(req, res, (err)=>{
-            if(err) return res.status(400).json(failRes(err.message))
-            Product.create(req.body, (err, product)=>{
-                product.merchant = req.user //to insert user data into field merchant's product. not use push. push only can used if an array
-                product.save()
-            })
-            
-        })
-       
-        res.status(201).json(sucRes(product, "Add Product Success"))
     } catch (err) {
-        res.status(422).json(failRes(err.message, "Wrong Type"))
+        res.status(422).json(failRes(err.message))
     }
 }
 async function updateProduct(req, res){
@@ -89,12 +56,25 @@ async function updateProduct(req, res){
         if (product.merchant != req.user) {
             return res.status(403).json(failRes("Access denied. This isn't your product"))
         }
-        try {
-            let data = await Product.findByIdAndUpdate(req.params.id, {$set: req.body})
-            res.status(200).json(sucRes(data, "Product Update Success"))
-        } catch (err) {
-            res.status(400).json(failRes(err.message, "Wrong Type"))
-        }
+        await uploadImage.single('images')(req, res, (err)=>{
+            if(err) return res.status(400).json(failRes(err.message))
+            Product.findByIdAndUpdate(req.params.id, {$set: req.body}, (err, product)=>{
+                if (err) res.status(400).json(failRes(err))
+
+                if (req.file == null){
+                    return res.status(201).json(sucRes(product, "Edit product success"))
+                }
+                let file = dUri.format(`${req.file.originalname}-${Date.now()}`, req.file.buffer)
+                cloudinary.uploader.upload(file.content, {use_filename: true, folder: "eCommerce"}, (err, result) => {
+                    if (err) return res.status(400).json(failRes(err));
+
+                    product.images.push(result.secure_url)
+                    product.save()
+
+                    res.status(200).json(sucRes(product, "Edit product and image success"))
+                })
+            })
+        })
     } catch (err) {
         res.status(404).json(failRes(err.message, "ID Product Not Found"))
     }
